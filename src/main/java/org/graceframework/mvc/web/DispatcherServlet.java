@@ -8,11 +8,13 @@ import org.graceframework.mvc.HandlerExceptionResolver;
 import org.graceframework.mvc.HandlerMapping;
 import org.graceframework.mvc.core.DefaultHandlerExceptionResolver;
 import org.graceframework.mvc.core.HandlerInterceptorChain;
+import org.graceframework.mvc.core.HandlerInvoker;
 import org.graceframework.mvc.core.RequestUtil;
 import org.graceframework.mvc.error.InitDispatcherServletError;
 import org.graceframework.mvc.exception.NotFindHandlerException;
 import org.graceframework.util.ClassUtil;
 import org.graceframework.util.CollectionUtil;
+import org.graceframework.util.JavassistUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.TypeVariable;
 import java.util.List;
 
 /**
@@ -47,27 +50,31 @@ public class DispatcherServlet extends HttpServlet {
 
 
     @Override
-    public void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        req.setCharacterEncoding(RequestUtil.CHARACTER_ENCODING);
+        request.setCharacterEncoding(RequestUtil.CHARACTER_ENCODING);
 
         if (logger.isDebugEnabled()) {
-            logger.debug("接收到 {}请求，请求地址 {}...", req.getMethod(), req.getRequestURI());
+            logger.debug("接收到 {}请求，请求地址 {}...", request.getMethod(), request.getRequestURI());
         }
 
-        HandlerInterceptorChain handler = handlerMapping.getHandler(req);
+        HandlerInterceptorChain handler = handlerMapping.getHandler(request);
 
         if (handler == null) {
-            resp.sendError(404,"你访问的地址不存在...");
-            logger.error("根据请求 {} 没有找到对应的处理器...", req.getRequestURI());
+            response.sendError(404,"你访问的地址不存在...");
+            logger.error("根据请求 {} 没有找到对应的处理器...", request.getRequestURI());
             return;
         }
+
         //preHandle...
-        Method method = handler.getHandler();
+
+
         try {
-            method.invoke(handler.getControllerBean());
+
+            HandlerInvoker.invok(request, response , handler);
+
         } catch (Exception e) {
-            handlerExceptionResolver.resolveHandlerException(req, resp, e);
+            handlerExceptionResolver.resolveHandlerException(request, response, e);
         }
 
         //postHandle...

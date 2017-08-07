@@ -38,6 +38,7 @@
     <slf4j.version>1.7.5</slf4j.version>
     <commons-lang.version>2.4</commons-lang.version>
     <commons-collections.version>3.2.1</commons-collections.version>
+    <javassist.version>3.12.1.GA</javassist.version>
     <junit.version>4.10</junit.version>
   </properties>
 
@@ -67,6 +68,12 @@
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
       <version>${commons-collections.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <version>${javassist.version}</version>
     </dependency>
 
     <dependency>
