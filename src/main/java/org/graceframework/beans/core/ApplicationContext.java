@@ -1,6 +1,7 @@
 package org.graceframework.beans.core;
 
 
+import org.graceframework.beans.BeanFactory;
 import org.graceframework.beans.Filter;
 import org.graceframework.beans.exception.BeansException;
 
@@ -13,37 +14,25 @@ import java.util.Set;
  * Created by Tong on 2017/8/1.
  * 实例化bean的容器
  */
-public class ApplicationContext extends AbstractBeanFactory {
-
-    private static ApplicationContext applicationContext = new ApplicationContext();
-
-    private ApplicationContext() {
-        DependencyInjection.IocInject(this);
-    }
-
-    public static ApplicationContext getInstance() {
-
-        return applicationContext;
-    }
+public class ApplicationContext implements BeanFactory {
 
     @Override
     public Map<Class<?>,Object> getBeanContainerMap() {
 
-        return beanContainerMap;
+        return InitBeanFactory.getBeanContainerMap();
     }
 
     @Override
     public Map<String,Class<?>> getAliasBeanMap() {
 
-        return aliasBeanMap;
+        return InitBeanFactory.getAliasBeanMap();
     }
-
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getBean(Class<T> clazz) throws BeansException {
 
-        Object obj = beanContainerMap.get(clazz);
+        Object obj = getBeanContainerMap().get(clazz);
         if (obj != null) {
             return (T) obj;
         } else {
@@ -55,7 +44,7 @@ public class ApplicationContext extends AbstractBeanFactory {
     @Override
     public Object getBean(String alias) throws BeansException {
 
-        Class<?> clazz = aliasBeanMap.get(alias);
+        Class<?> clazz = getAliasBeanMap().get(alias);
         if (clazz != null) {
             return getBean(clazz);
         } else {
@@ -67,7 +56,7 @@ public class ApplicationContext extends AbstractBeanFactory {
     public List<Object> getBeanByYouWant(Filter<Class<?>> classFilter) {
 
         List<Object> objects = new ArrayList<>();
-        Set<Map.Entry<Class<?>, Object>> entries = beanContainerMap.entrySet();
+        Set<Map.Entry<Class<?>, Object>> entries = getBeanContainerMap().entrySet();
 
         for (Map.Entry<Class<?>, Object> beanEntry : entries) {
 

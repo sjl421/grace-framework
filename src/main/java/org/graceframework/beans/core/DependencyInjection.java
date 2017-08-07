@@ -2,6 +2,7 @@ package org.graceframework.beans.core;
 
 
 
+import org.graceframework.InstanceFactory;
 import org.graceframework.beans.BeanFactory;
 import org.graceframework.beans.Filter;
 import org.graceframework.beans.annotation.Inject;
@@ -26,10 +27,9 @@ public class DependencyInjection {
 
     private static final Logger logger = LoggerFactory.getLogger(DependencyInjection.class);
 
-    public static void IocInject(BeanFactory beanFactory) {
-
+    static {
         try {
-
+            BeanFactory beanFactory = InstanceFactory.getBeanFactory();
             Map<Class<?>, Object> beanContainerMap = beanFactory.getBeanContainerMap();
             Set<Map.Entry<Class<?>, Object>> entries = beanContainerMap.entrySet();
             for (Map.Entry<Class<?>, Object> beanEntry : entries) {
@@ -77,6 +77,7 @@ public class DependencyInjection {
     }
 
 
+
     /**
      * 获取需要注入的实例
      * @param fieldClass 可能为接口或者抽象类或者正常的类
@@ -106,4 +107,6 @@ public class DependencyInjection {
 
         return beanFactory.getBean(fieldClass);
     }
+
+
 }

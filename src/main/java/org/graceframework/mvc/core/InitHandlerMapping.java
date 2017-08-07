@@ -1,17 +1,15 @@
 package org.graceframework.mvc.core;
 
 
+import org.graceframework.InstanceFactory;
 import org.graceframework.beans.BeanFactory;
 import org.graceframework.beans.Filter;
 import org.graceframework.beans.annotation.Controller;
 import org.graceframework.beans.annotation.Interceptor;
-import org.graceframework.beans.core.ApplicationContext;
 import org.graceframework.mvc.HandlerInterceptor;
-import org.graceframework.mvc.HandlerMapping;
 import org.graceframework.mvc.annotation.GET;
 import org.graceframework.mvc.annotation.POST;
-import org.graceframework.mvc.error.NotFindHandlerException;
-import org.graceframework.mvc.exception.InitialHandlerMappingError;
+import org.graceframework.mvc.error.InitialHandlerMappingError;
 import org.graceframework.util.ArrayUtil;
 import org.graceframework.util.CollectionUtil;
 import org.graceframework.util.MapUtil;
@@ -24,29 +22,27 @@ import java.util.*;
 
 /**
  * Created by Tony Liu on 2017/8/4.
+ * Servlet 初始化时加载
  */
-public abstract class AbstractHandlerMapping implements HandlerMapping {
+public class InitHandlerMapping {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractHandlerMapping.class);
+    private static final Logger logger = LoggerFactory.getLogger(InitHandlerMapping.class);
 
     /**
      * 映射的地址是完整的路径
      */
-    static final Map<Requester,HandlerInterceptorChain> fullPathHandlerMapping = new HashMap<>();
+    private static final Map<Requester,HandlerInterceptorChain> fullPathHandlerMapping = new HashMap<>();
     /**
      * 映射的地址带通配符
      */
-    static final Map<Requester,HandlerInterceptorChain> wildcardHandlerMapping = new HashMap<>();
+    private static final Map<Requester,HandlerInterceptorChain> wildcardHandlerMapping = new HashMap<>();
 
     static {
         //把拦截器和映射关系封装到handlerMapping中
-        BeanFactory beanFactory = ApplicationContext.getInstance();
+        BeanFactory beanFactory = InstanceFactory.getBeanFactory();
         List<Object> controllerBeans = getControllerBeans(beanFactory);
         List<Object> interceptorBeans = getInterceptorBeansAndSort(beanFactory);
         for (Object controllerBean : controllerBeans) {
-
-
-
             Class<?> controllerClazz = controllerBean.getClass();
             Controller controllerAnnotation = controllerClazz.getAnnotation(Controller.class);
             String controllerPath = StringUtil.doPath(controllerAnnotation.path());
@@ -57,7 +53,7 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
                     if (requester != null) {
 
                         if (logger.isWarnEnabled()) {
-                            logger.warn("控制器映射处理器开始建立 {} -- {}", requester.getPath(), method);
+                            logger.warn("控制器处理器映射开始建立 {} -- {}", requester.getPath(), method);
                         }
                         //验证是否用重复的handle
                         String requestPath = requester.getPath();
@@ -218,7 +214,7 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
      * @param request 请求封装的对象
      * @return 处理器
      */
-    public static HandlerInterceptorChain getHandler(Requester request){
+    static HandlerInterceptorChain getHandler(Requester request){
 
         HandlerInterceptorChain handlerInterceptorChain;
 
@@ -234,11 +230,6 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
                     }
                 }
             }
-        }
-
-        if (handlerInterceptorChain == null) {
-
-            throw new NotFindHandlerException("没有找到匹配的handler   " + request.getPath());
         }
 
         return handlerInterceptorChain;

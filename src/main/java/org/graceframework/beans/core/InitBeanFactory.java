@@ -1,8 +1,6 @@
 package org.graceframework.beans.core;
 
 
-
-import org.graceframework.beans.BeanFactory;
 import org.graceframework.beans.annotation.Bean;
 import org.graceframework.beans.annotation.Controller;
 import org.graceframework.beans.annotation.Interceptor;
@@ -21,9 +19,9 @@ import java.util.Set;
 /**
  * Created by Tong on 2017/8/1.
  */
-public abstract class AbstractBeanFactory implements BeanFactory {
+public abstract class InitBeanFactory {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractBeanFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(InitBeanFactory.class);
 
     static final Map<Class<?>,Object> beanContainerMap = new HashMap<>();
     static final Map<String,Class<?>> aliasBeanMap = new HashMap<>();
@@ -62,6 +60,7 @@ public abstract class AbstractBeanFactory implements BeanFactory {
         }
 
 
+
     }
 
     private static boolean needInstance(Class<?> clazz) {
@@ -85,5 +84,13 @@ public abstract class AbstractBeanFactory implements BeanFactory {
         return "";
     }
 
+    public static Map<Class<?>,Object> getBeanContainerMap() {
 
+        return beanContainerMap;
+    }
+
+    public static Map<String,Class<?>> getAliasBeanMap() {
+
+        return aliasBeanMap;
+    }
 }

@@ -17,6 +17,6 @@ public interface HandlerMapping {
      * @return 返回处理器链
      * @throws Exception
      */
-    HandlerInterceptorChain getHandler(HttpServletRequest request) throws Exception;
+    HandlerInterceptorChain getHandler(HttpServletRequest request);
 
 }

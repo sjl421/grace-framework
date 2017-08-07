@@ -1,4 +1,4 @@
-package org.graceframework.mvc.exception;
+package org.graceframework.mvc.error;
 
 /**
  * Created by Tong on 2017/8/2.

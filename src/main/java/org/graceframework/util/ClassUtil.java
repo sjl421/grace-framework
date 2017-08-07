@@ -37,6 +37,17 @@ public class ClassUtil {
 
     }
 
+    public static Class<?> loadClass(String className) {
+        Class<?> cls;
+        try {
+            cls = Class.forName(className, true, getClassLoader());
+        } catch (ClassNotFoundException e) {
+            logger.error("加载类出错！", e);
+            throw new RuntimeException(e);
+        }
+        return cls;
+    }
+
     /**
      * 加载类
      */
@@ -81,5 +92,18 @@ public class ClassUtil {
     public static boolean isNormalClass(Class<?> clazz) {
 
         return !isInterface(clazz) && !isAbstract(clazz);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T newInstance(String className) {
+        T instance;
+        try {
+            Class<?> commandClass = ClassUtil.loadClass(className);
+            instance = (T) commandClass.newInstance();
+        } catch (Exception e) {
+            logger.error("创建实例出错！", e);
+            throw new RuntimeException(e);
+        }
+        return instance;
     }
 }
