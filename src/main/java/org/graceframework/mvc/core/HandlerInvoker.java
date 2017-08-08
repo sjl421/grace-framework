@@ -1,15 +1,13 @@
 package org.graceframework.mvc.core;
 
-import org.graceframework.util.ArrayUtil;
-import org.graceframework.util.JavassistUtil;
-import org.graceframework.util.StringUtil;
+import org.graceframework.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
 /**
  * Created by Tong on 2017/8/7.
@@ -17,30 +15,90 @@ import java.util.Map;
 public class HandlerInvoker {
 
 
-    public static void invok(HttpServletRequest request, HttpServletResponse response, HandlerInterceptorChain handler) {
+    public static void invoke(HttpServletRequest request, HttpServletResponse response, HandlerInterceptorChain handler) {
 
+        Object controllerBean = handler.getControllerBean();
+        Method method = handler.getHandler();
         String contentType = request.getContentType();
         Object[] params;
         //当普通表单处理
         if (StringUtil.isBlank(contentType)) {
             params = createParamListNormal(request, handler);
+            Object ret = ClassUtil.invoke(controllerBean, method, params);
+            System.out.println(ret);
         }
 
     }
 
+    //需要简化 抽离
     private static Object[] createParamListNormal(HttpServletRequest request, HandlerInterceptorChain handler) {
 
-        Class<?> controllerClazz = handler.getControllerBean().getClass();
+        Object controllerBean = handler.getControllerBean();
+
         Method method = handler.getHandler();
-        Map<String, Object> methodParamNameAndParamClassMap = JavassistUtil.getMethodParamNameAndParamClassMap(controllerClazz, method);
-        Map<String, Object> requestParamMap = getRequestParamMap(request);
-        
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        if (ArrayUtil.isNotEmpty(parameterTypes)) {
+            Class<?> controllerClazz = controllerBean.getClass();
+            Map<Class<?>,String> methodParamNameAndParamClassMap = JavassistUtil.getMethodParamNameAndParamClassMap(controllerClazz, method);
+            int paramLength = parameterTypes.length;
+            List<Object> paramArr = new ArrayList<>();
+            for (int i = 0; i < paramLength; i++) {
+                Class<?> parameterType = parameterTypes[i];
+
+                if (ClassUtil.isTypeOrPackageype(parameterType)) {
+                    String paramName = methodParamNameAndParamClassMap.get(parameterType);
+                    String parameter = request.getParameter(paramName);
+                    if (StringUtil.isNotBlank(parameter)) {
+                        Object value = WebCastUtil.getValue(parameterType, parameter);
+                        if (value != null) {
+                            paramArr.add(value);
+                        }
+                    }
+                } else {
+                    try {
+                        Object obj = parameterType.newInstance();
+
+                        Field[] fields = obj.getClass().getDeclaredFields();
+                        int sum = 0;
+                        for (Field field : fields) {
+                            int mod = field.getModifiers();
+                            if(Modifier.isStatic(mod) || Modifier.isFinal(mod)){
+                                continue;
+                            }
+
+                            String parameter1 = request.getParameter(field.getName());
+                            if (StringUtil.isNotBlank(parameter1)) {
+                                field.setAccessible(true);
+                                Object fieldValue = WebCastUtil.getValue(field.getType(), parameter1);
+                                field.set(obj, fieldValue);
+                                sum ++;
+                            }
+                        }
+                        if (sum > 0) {
+                            paramArr.add(obj);
+                        } else {
+                            throw new RuntimeException("没有任何参数能匹配这个对象 " + parameterType);
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+
+            //检查参数长度
+            if (paramArr.size() != paramLength) {
+                throw new RuntimeException("传入参数与控制器不匹配...");
+            }
+
+            return paramArr.toArray();
+        }
+
         return null;
     }
 
-    private static Map<String,Object> getRequestParamMap(HttpServletRequest request) {
+    private static Map<String,String> getRequestParamMap(HttpServletRequest request) {
 
-        Map<String, Object> paramMap = new HashMap<>();
+        Map<String, String> paramMap = new HashMap<>();
         Enumeration<String> paramNames = request.getParameterNames();
         while (paramNames.hasMoreElements()) {
             String paramName = paramNames.nextElement();

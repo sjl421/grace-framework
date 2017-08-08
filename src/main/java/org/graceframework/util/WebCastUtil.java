@@ -32,5 +32,26 @@ public class WebCastUtil {
         return Float.parseFloat(param);
     }
 
+    /**
+     * 判断参数是否为基本类型
+     */
+    public static Object getValue(Class<?> type, String value){
+
+        if (ClassUtil.isString(type)) {
+            return value;
+        } else if (ClassUtil.isInt(type)) {
+            return castInteger(value);
+        } else if (ClassUtil.isDouble(type)) {
+            return castDouble(value);
+        } else if (ClassUtil.isLong(type)) {
+            return castLong(value);
+        } else if (ClassUtil.isFloat(type)) {
+            return castFloat(value);
+        } else if (ClassUtil.isBoolean(type)) {
+            return castBoolean(value);
+        }
+
+        return null;
+    }
 
 }

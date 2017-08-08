@@ -18,14 +18,14 @@ public class JavassistUtil {
      * @param method 方法
      * @return 参数名称和参数的类型映射
      */
-    public static Map<String,Object> getMethodParamNameAndParamClassMap(Class<?> clazz, Method method) {
+    public static Map<Class<?>,String> getMethodParamNameAndParamClassMap(Class<?> clazz, Method method) {
 
         ClassPool pool = ClassPool.getDefault();
         ClassClassPath classPath = new ClassClassPath(JavassistUtil.class);
         pool.insertClassPath(classPath);
         CtClass cc;
         CtMethod cm;
-        Map<String,Object> paramMap = null;
+        Map<Class<?>,String> paramMap = null;
         try {
             cc = pool.get(clazz.getName());
             Class<?>[] parameterTypes = method.getParameterTypes();
@@ -43,7 +43,7 @@ public class JavassistUtil {
 
                 int pos = Modifier.isStatic(cm.getModifiers()) ? 0 : 1;
                 for (int i = 0; i < parameterTypesLength; i++) {
-                    paramMap.put(attr.variableName(i + pos),parameterTypes[i]);
+                    paramMap.put(parameterTypes[i], attr.variableName(i + pos));
                 }
             }
 

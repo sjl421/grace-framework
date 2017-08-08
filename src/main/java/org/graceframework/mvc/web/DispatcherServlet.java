@@ -1,6 +1,5 @@
 package org.graceframework.mvc.web;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.graceframework.InstanceFactory;
 import org.graceframework.beans.BeanFactory;
 import org.graceframework.beans.Filter;
@@ -11,10 +10,8 @@ import org.graceframework.mvc.core.HandlerInterceptorChain;
 import org.graceframework.mvc.core.HandlerInvoker;
 import org.graceframework.mvc.core.RequestUtil;
 import org.graceframework.mvc.error.InitDispatcherServletError;
-import org.graceframework.mvc.exception.NotFindHandlerException;
 import org.graceframework.util.ClassUtil;
 import org.graceframework.util.CollectionUtil;
-import org.graceframework.util.JavassistUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +22,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.TypeVariable;
 import java.util.List;
 
 /**
@@ -71,7 +66,7 @@ public class DispatcherServlet extends HttpServlet {
 
         try {
 
-            HandlerInvoker.invok(request, response , handler);
+            HandlerInvoker.invoke(request, response , handler);
 
         } catch (Exception e) {
             handlerExceptionResolver.resolveHandlerException(request, response, e);
