@@ -1,4 +1,4 @@
-package org.graceframework.mvc.web;
+package org.graceframework;
 
 import org.graceframework.beans.core.DependencyInjection;
 import org.graceframework.beans.core.InitBeanFactory;
@@ -14,7 +14,7 @@ import javax.servlet.annotation.WebListener;
  * 启动web框架 Servlet监听器
  */
 @WebListener
-public class ContextListener implements ServletContextListener {
+public class Bootstrap implements ServletContextListener {
 
 
     @Override

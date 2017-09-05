@@ -5,7 +5,9 @@ package org.graceframework.mvc.core;
  * Created by Tony Liu on 2017/8/3.
  */
 public class Requester {
-
+    /**
+     * 请求方式 get 或者post
+     */
     private String method;
     private String path;
 

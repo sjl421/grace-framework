@@ -63,7 +63,7 @@ public class InitHandlerMapping {
                         } else {
                             //验证全路径匹配是否用重复的handle
                             HandlerInterceptorChain checkHandler = fullPathHandlerMapping.get(requester);
-                            if (fullPathHandlerMapping.get(requester) != null) {
+                            if (checkHandler != null) {
                                 throw new InitialHandlerMappingError(
                                         "出现重复的映射关系 " + checkHandler.getControllerBean().getClass() + " " + controllerBean.getClass()+" "+requester.getPath());
                             }
@@ -122,7 +122,7 @@ public class InitHandlerMapping {
                 if (interceptorBean instanceof HandlerInterceptor) {
                     Interceptor interceptor = interceptorBean.getClass().getAnnotation(Interceptor.class);
                     String interceptorPath = interceptor.path();
-                    if (StringUtil.EMPTY.endsWith(interceptorPath)) {
+                    if (StringUtil.EMPTY.equals(interceptorPath)) {
                         list.add((HandlerInterceptor)interceptorBean);
                     } else if (StringUtil.matcher(path,interceptorPath)) {
                         list.add((HandlerInterceptor)interceptorBean);

@@ -23,8 +23,8 @@ public abstract class InitBeanFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(InitBeanFactory.class);
 
-    static final Map<Class<?>,Object> beanContainerMap = new HashMap<>();
-    static final Map<String,Class<?>> aliasBeanMap = new HashMap<>();
+    private static final Map<Class<?>,Object> beanContainerMap = new HashMap<>();
+    private static final Map<String,Class<?>> aliasBeanMap = new HashMap<>();
 
     static {
 
@@ -84,12 +84,12 @@ public abstract class InitBeanFactory {
         return "";
     }
 
-    public static Map<Class<?>,Object> getBeanContainerMap() {
+    static Map<Class<?>,Object> getBeanContainerMap() {
 
         return beanContainerMap;
     }
 
-    public static Map<String,Class<?>> getAliasBeanMap() {
+    static Map<String,Class<?>> getAliasBeanMap() {
 
         return aliasBeanMap;
     }
