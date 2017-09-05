@@ -1,4 +1,4 @@
-package org.graceframework.mybatis.transaction;
+package org.graceframework.mybatis.tx;
 
 import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.apache.ibatis.transaction.Transaction;

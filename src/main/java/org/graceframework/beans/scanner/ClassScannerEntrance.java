@@ -2,6 +2,7 @@ package org.graceframework.beans.scanner;
 
 import org.graceframework.beans.ClassScanner;
 import org.graceframework.beans.Filter;
+import org.graceframework.util.StringUtil;
 
 import java.lang.annotation.Annotation;
 import java.util.Set;
@@ -27,18 +28,23 @@ public class ClassScannerEntrance {
         return scanner.scanAllPackage(packageName);
     }
 
-    public Set<Class<?>> scanPackageByAnnotation(final Class<? extends Annotation> annotationClass) {
+    public Set<Class<?>> scanPackage(String pkName) {
 
-        return scanner.scanPackageByAnnotation(packageName, annotationClass);
+        return scanner.scanAllPackage(pkName);
     }
 
-    public Set<Class<?>> scanPackageBySuper(final Class<?> superClass) {
+    public Set<Class<?>> scanPackageByAnnotation(String pkName, final Class<? extends Annotation> annotationClass) {
 
-        return scanner.scanPackageBySuper(packageName, superClass);
+        return scanner.scanPackageByAnnotation(StringUtil.isNotBlank(pkName) ? pkName : packageName, annotationClass);
     }
 
-    public Set<Class<?>> scanPackageGetYouWant(Filter<Class<?>> classFilter) {
+    public Set<Class<?>> scanPackageBySuper(String pkName, final Class<?> superClass) {
 
-        return scanner.scanPackageGetYouWant(packageName,classFilter);
+        return scanner.scanPackageBySuper(StringUtil.isNotBlank(pkName) ? pkName : packageName, superClass);
+    }
+
+    public Set<Class<?>> scanPackageGetYouWant(String pkName, Filter<Class<?>> classFilter) {
+
+        return scanner.scanPackageGetYouWant(StringUtil.isNotBlank(pkName) ? pkName : packageName,classFilter);
     }
 }

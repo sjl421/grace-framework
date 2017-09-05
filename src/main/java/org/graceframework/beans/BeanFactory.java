@@ -46,5 +46,11 @@ public interface BeanFactory {
      */
     List<Object> getBeanByYouWant(Filter<Class<?>> classFilter);
 
+    /**
+     * 装入实例
+     * @param clazz 类
+     * @param obj 类的实例
+     */
+    void setBean(Class<?> clazz, Object obj);
 
 }

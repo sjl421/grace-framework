@@ -1,11 +1,13 @@
 package org.graceframework.aop;
 
-import java.lang.annotation.Annotation;
+import java.lang.annotation.*;
 
 /**
  * Created by Tony Liu on 2017/9/5.
  * 定义切面类时 没有这个注解的类 不会被实例化
  */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Aspect {
 
     /**

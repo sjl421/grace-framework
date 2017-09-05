@@ -9,7 +9,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.graceframework.InstanceFactory;
-import org.graceframework.mybatis.transaction.GraceManagedTransactionFactory;
+import org.graceframework.mybatis.tx.GraceManagedTransactionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

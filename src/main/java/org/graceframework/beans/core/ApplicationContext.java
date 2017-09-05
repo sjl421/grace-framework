@@ -69,4 +69,10 @@ public class ApplicationContext implements BeanFactory {
         return objects;
     }
 
+    @Override
+    public void setBean(Class<?> clazz, Object obj) {
+
+        getBeanContainerMap().put(clazz,obj);
+    }
+
 }
