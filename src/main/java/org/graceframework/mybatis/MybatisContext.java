@@ -1,13 +1,15 @@
 package org.graceframework.mybatis;
 
-import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.Environment;
-import org.apache.ibatis.session.*;
+import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.TransactionFactory;
-import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.graceframework.InstanceFactory;
+import org.graceframework.mybatis.transaction.GraceManagedTransactionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +19,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * Created by Tony Liu on 2017/9/4.
@@ -37,13 +37,10 @@ public class MybatisContext {
 
     private static SqlSessionFactory sqlSessionFactory;
 
-    private static ThreadLocal<SqlSession> sqlSessionThreadLocal = new ThreadLocal<>();
-
-
     static {
         DataSource dataSource = InstanceFactory.getDataSource();
         if (dataSource != null) {
-            TransactionFactory transactionFactory = new JdbcTransactionFactory();
+            TransactionFactory transactionFactory = new GraceManagedTransactionFactory();
             Environment environment = new Environment(MYBATIS_SQLSESSIONFACTORY_NAME, transactionFactory, dataSource);
             Configuration configuration = new Configuration(environment);
             configuration.setLogImpl(configuration.getTypeAliasRegistry().resolveAlias(MYBATIS_LOG));
@@ -112,86 +109,39 @@ public class MybatisContext {
                             return name.toLowerCase().endsWith(".xml");
                         }
                     });
-                    for (File file : files) {
-                        registerXml(resUrl + file.getName(), configuration);
+                    if (files != null) {
+                        for (File file : files) {
+                            registerXml(resUrl + file.getName(), configuration);
+                        }
                     }
                 }
             } catch (IOException e) {
+                logger.error(e.getMessage());
             }
         }
     }
 
     /**
-     * 获取SqlSession - 如果不存在则创建一个
-     *
+     * 此时SqlSessionFactory对象已经创建
+     * 获取 SqlSessionFactory
      */
-    public static SqlSession getSqlSession() {
+    public static SqlSessionFactory getSqlSessionFactory() {
 
         if (sqlSessionFactory == null) {
-            return null;
+            throw new RuntimeException("sqlSessionFactory是null，获取失败。。。");
         }
-        SqlSession sqlSession = sqlSessionThreadLocal.get();
-        if (sqlSession == null) {
-            sqlSession = sqlSessionFactory.openSession(TransactionIsolationLevel.REPEATABLE_READ);
-            sqlSessionThreadLocal.set(sqlSession);
-        }
-        return sqlSession;
+        return sqlSessionFactory;
     }
-
-
 
     /**
      * 获取Mapper
-     *
      */
     public static <T> T getMapper(Class<T> type) {
-        SqlSession sqlSession = getSqlSession();
+        SqlSession sqlSession = SqlSessionUtil.getSqlSession();
         if (sqlSession == null) {
-            return (T) null;
+            return null;
         }
-        return (T) sqlSession.getMapper(type);
-    }
-
-    /**
-     * 提交事务
-     */
-    public static void commit() {
-
-        if (sqlSessionFactory != null) {
-            SqlSession sqlSession = getSqlSession();
-            if (sqlSession != null) {
-                sqlSession.commit();
-                logger.debug("Mybatis SqlSession - 提交");
-            }
-        }
-    }
-
-    /**
-     * 关闭Session
-     */
-    public static void closeSession() {
-        if (sqlSessionFactory != null) {
-            SqlSession sqlSession = getSqlSession();
-            if (sqlSession != null) {
-                sqlSession.close();
-                //移出session
-                sqlSessionThreadLocal.remove();
-                logger.debug("Mybatis SqlSession - 关闭");
-            }
-        }
-    }
-
-    /**
-     * 回滚
-     */
-    public static void rollback() {
-        if (sqlSessionFactory != null) {
-            SqlSession sqlSession = getSqlSession();
-            if (sqlSession != null) {
-                sqlSession.rollback();
-                logger.debug("Mybatis SqlSession - 回滚");
-            }
-        }
+        return sqlSession.getMapper(type);
     }
 
 }

@@ -91,7 +91,7 @@ public class DependencyInjection {
             List<Object> list = beanFactory.getBeanByYouWant(new Filter<Class<?>>() {
                 @Override
                 public boolean accept(Class<?> clazz) {
-                    return fieldClass.isAssignableFrom(clazz);
+                    return fieldClass.isAssignableFrom(clazz) && ClassUtil.isNormalClass(clazz);
                 }
             });
             int size = list.size();

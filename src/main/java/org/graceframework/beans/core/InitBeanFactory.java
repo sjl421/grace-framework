@@ -1,6 +1,7 @@
 package org.graceframework.beans.core;
 
 
+import org.graceframework.aop.Aspect;
 import org.graceframework.beans.annotation.Bean;
 import org.graceframework.beans.annotation.Controller;
 import org.graceframework.beans.annotation.Interceptor;
@@ -68,7 +69,8 @@ public abstract class InitBeanFactory {
         return clazz != null && (clazz.isAnnotationPresent(Service.class) ||
                 clazz.isAnnotationPresent(Bean.class) ||
                 clazz.isAnnotationPresent(Controller.class) ||
-                clazz.isAnnotationPresent(Interceptor.class));
+                clazz.isAnnotationPresent(Interceptor.class) ||
+                clazz.isAnnotationPresent(Aspect.class));
 
     }
 

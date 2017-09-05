@@ -10,10 +10,7 @@ import org.graceframework.mvc.HandlerInterceptor;
 import org.graceframework.mvc.annotation.GET;
 import org.graceframework.mvc.annotation.POST;
 import org.graceframework.mvc.error.InitialHandlerMappingError;
-import org.graceframework.util.ArrayUtil;
-import org.graceframework.util.CollectionUtil;
-import org.graceframework.util.MapUtil;
-import org.graceframework.util.StringUtil;
+import org.graceframework.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,7 +167,7 @@ public class InitHandlerMapping {
         return beanFactory.getBeanByYouWant(new Filter<Class<?>>() {
             @Override
             public boolean accept(Class<?> clazz) {
-                return clazz.isAnnotationPresent(Controller.class);
+                return clazz.isAnnotationPresent(Controller.class) && ClassUtil.isNormalClass(clazz);
             }
         });
 
@@ -187,7 +184,7 @@ public class InitHandlerMapping {
         List<Object> list = beanFactory.getBeanByYouWant(new Filter<Class<?>>() {
             @Override
             public boolean accept(Class<?> clazz) {
-                return clazz.isAnnotationPresent(Interceptor.class);
+                return clazz.isAnnotationPresent(Interceptor.class) && ClassUtil.isNormalClass(clazz) ;
             }
         });
 

@@ -1,9 +1,9 @@
-package org.graceframework.aop;
+package org.graceframework.aop.proxy;
 
 /**
  * Created by Tony Liu on 2017/9/5.
  */
-public interface Proxy {
+public interface AopProxy {
 
     Object doProxy(AopProxyChain chain) throws Throwable;
 }

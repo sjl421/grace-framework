@@ -1,4 +1,4 @@
-package org.graceframework.aop;
+package org.graceframework.aop.proxy;
 
 import net.sf.cglib.proxy.MethodProxy;
 
@@ -11,26 +11,22 @@ import java.util.List;
  */
 public class AopProxyChain {
 
-    private List<Proxy> proxyList = new ArrayList<>();
+    private List<AopProxy> aopProxyList = new ArrayList<>();
     private int currentProxyIndex = 0;
 
     private Object targetObj;
     private Method targetMethod;
     private Object[] args;
     private MethodProxy methodProxy;
-    private Object methodResult;
 
-    public AopProxyChain(List<Proxy> proxyList, Object targetObj, Method targetMethod, Object[] args, MethodProxy methodProxy) {
-        this.proxyList = proxyList;
+    public AopProxyChain(List<AopProxy> aopProxyList, Object targetObj, Method targetMethod, Object[] args, MethodProxy methodProxy) {
+        this.aopProxyList = aopProxyList;
         this.targetObj = targetObj;
         this.targetMethod = targetMethod;
         this.args = args;
         this.methodProxy = methodProxy;
     }
 
-    public Object getMethodResult() {
-        return methodResult;
-    }
 
     public Object getTargetObj() {
         return targetObj;
@@ -44,14 +40,11 @@ public class AopProxyChain {
         return args;
     }
 
-    public MethodProxy getMethodProxy() {
-        return methodProxy;
-    }
+    public Object doProceed() throws Throwable {
 
-    public void doProceed() throws Throwable {
-
-        if (currentProxyIndex < proxyList.size()) {
-            methodResult = proxyList.get(currentProxyIndex++).doProxy(this);
+        Object methodResult;
+        if (currentProxyIndex < aopProxyList.size()) {
+            methodResult = aopProxyList.get(currentProxyIndex++).doProxy(this);
         } else {
             try {
                 methodResult = methodProxy.invokeSuper(targetObj, args);
@@ -59,6 +52,7 @@ public class AopProxyChain {
                 throw new RuntimeException(t);
             }
         }
+        return methodResult;
     }
 
 }

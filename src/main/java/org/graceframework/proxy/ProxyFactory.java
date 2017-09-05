@@ -3,8 +3,8 @@ package org.graceframework.proxy;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
-import org.graceframework.aop.AopProxyChain;
-import org.graceframework.aop.Proxy;
+import org.graceframework.aop.proxy.AopProxyChain;
+import org.graceframework.aop.proxy.AopProxy;
 import org.graceframework.mybatis.MybatisContext;
 
 import java.lang.reflect.Method;
@@ -37,16 +37,21 @@ public class ProxyFactory {
         });
     }
 
+    /**
+     * aop代理
+     * @param clazz 目标类
+     * @param aopProxyList 代理链
+     * @return aop代理
+     */
     @SuppressWarnings("unchecked")
-    public static <T> T createAopProxy(final Class<T> clazz, final List<Proxy> proxyList) {
+    public static <T> T createAopProxy(final Class<T> clazz, final List<AopProxy> aopProxyList) {
 
         return (T) Enhancer.create(clazz, new MethodInterceptor() {
 
             @Override
             public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
 
-                AopProxyChain aopProxyChain = new AopProxyChain(proxyList, o, method, objects, methodProxy);
-                return aopProxyChain.getMethodResult();
+                return new AopProxyChain(aopProxyList, o, method, objects, methodProxy).doProceed();
             }
         });
     }
