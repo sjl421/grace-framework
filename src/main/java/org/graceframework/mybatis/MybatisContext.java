@@ -125,7 +125,7 @@ public class MybatisContext {
      * 此时SqlSessionFactory对象已经创建
      * 获取 SqlSessionFactory
      */
-    public static SqlSessionFactory getSqlSessionFactory() {
+    static SqlSessionFactory getSqlSessionFactory() {
 
         if (sqlSessionFactory == null) {
             throw new RuntimeException("sqlSessionFactory是null，获取失败。。。");
