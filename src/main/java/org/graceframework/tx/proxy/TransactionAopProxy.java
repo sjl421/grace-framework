@@ -1,10 +1,12 @@
 package org.graceframework.tx.proxy;
 
-import org.graceframework.aop.proxy.AopProxyChain;
 import org.graceframework.aop.proxy.AopProxy;
+import org.graceframework.aop.proxy.AopProxyChain;
 import org.graceframework.mybatis.SqlSessionUtil;
 import org.graceframework.tx.annotation.Isolation;
 import org.graceframework.tx.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 
@@ -13,63 +15,65 @@ import java.lang.reflect.Method;
  */
 public class TransactionAopProxy implements AopProxy {
 
+    private static final Logger logger = LoggerFactory.getLogger(TransactionAopProxy.class);
     //处理service方法嵌套
-    private static final ThreadLocal<Short> serviceMethodNum = new ThreadLocal<Short>() {
+    private static final ThreadLocal<Boolean> serviceMethodBool = new ThreadLocal<Boolean>() {
         @Override
-        protected Short initialValue() {
-            return 0;
+        protected Boolean initialValue() {
+            return false;
         }
     };
-
-    private static void increment() {
-        short flag = serviceMethodNum.get();
-        serviceMethodNum.set(++flag);
-    }
-
-    private static void decrement() {
-        short flag = serviceMethodNum.get();
-        serviceMethodNum.set(--flag);
-    }
 
     @Override
     public Object doProxy(AopProxyChain chain) throws Throwable {
 
         Method method = chain.getTargetMethod();
-        boolean annotationPresent = method.isAnnotationPresent(Transactional.class);
-        boolean autoCommit = true;
-        boolean readOnly = true;
-        Isolation isolationLevel = Isolation.DEFAULT;
-        if (annotationPresent) {
-            Transactional transactional = method.getAnnotation(Transactional.class);
-            autoCommit = false;
-            readOnly = transactional.readOnly();
-            isolationLevel = transactional.isolation();
-        }
+
+        boolean flag = serviceMethodBool.get();
         Object result;
-        try {
-            //开启事务
-            if (serviceMethodNum.get() == 0) {
+        if (!flag) {
+            serviceMethodBool.set(true);
+            boolean autoCommit = true;
+            boolean readOnly = false;
+            Isolation isolationLevel = Isolation.DEFAULT;
+            if (method.isAnnotationPresent(Transactional.class)) {
+                Transactional transactional = method.getAnnotation(Transactional.class);
+                autoCommit = false;
+                readOnly = transactional.readOnly();
+                isolationLevel = transactional.isolation();
+            }
+
+            try {
+                //开启事务
+                if (logger.isDebugEnabled() && !autoCommit) {
+                    logger.debug("开启事务 {}", Thread.currentThread().getName());
+                }
                 SqlSessionUtil.openSqlSession(isolationLevel.value(),autoCommit,readOnly);
-            }
-            increment();
 
-            //执行service 方法
-            result = chain.doProceed();
+                //执行service 方法
+                result = chain.doProceed();
 
-            decrement();
-            if (serviceMethodNum.get() == 0) {
+                if (logger.isDebugEnabled() && !autoCommit) {
+                    logger.debug("提交事务 {}", Thread.currentThread().getName());
+                }
                 SqlSessionUtil.commit();
-            }
-        } catch (Exception e) {
-            //抛异常 立即回滚
-            serviceMethodNum.set((short)0);
-            SqlSessionUtil.rollback();
-            throw e;
-        } finally {
-            if (serviceMethodNum.get() == 0) {
-                serviceMethodNum.remove();
+            } catch (Exception e) {
+                //抛异常 立即回滚
+                if (logger.isDebugEnabled() && !autoCommit) {
+                    logger.debug("事务回滚 {}", Thread.currentThread().getName());
+                }
+                SqlSessionUtil.rollback();
+                throw e;
+            } finally {
+                if (logger.isDebugEnabled() && !autoCommit) {
+                    logger.debug("关闭连接 {}", Thread.currentThread().getName());
+                }
+                serviceMethodBool.remove();
                 SqlSessionUtil.close();
             }
+        } else {
+            //执行service 方法
+            result = chain.doProceed();
         }
 
         return result;

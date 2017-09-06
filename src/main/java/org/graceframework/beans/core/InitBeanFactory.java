@@ -34,8 +34,8 @@ public abstract class InitBeanFactory {
             for (Class<?> clazz : classSet) {
                 if (needInstance(clazz)){
 
-                    if (logger.isWarnEnabled()) {
-                        logger.warn("正在实例化对象 {}...", clazz);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("正在实例化对象 {}...", clazz);
                     }
                     if (!ClassUtil.isNormalClass(clazz)) {
                         throw new InitialContextError("这个类不能被实例化  " + clazz);

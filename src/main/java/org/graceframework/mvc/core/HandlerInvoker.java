@@ -4,6 +4,7 @@ import org.graceframework.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -25,7 +26,20 @@ public class HandlerInvoker {
         if (StringUtil.isBlank(contentType)) {
             params = createParamListNormal(request, handler);
             Object ret = ClassUtil.invoke(controllerBean, method, params);
-            System.out.println(ret);
+            if (ret != null) {
+                try {
+                    // 设置响应头
+                    response.setContentType("application/json"); // 指定内容类型为 JSON 格式
+                    response.setCharacterEncoding("utf-8"); // 防止中文乱码
+                    // 向响应中写入数据
+                    PrintWriter writer = response.getWriter();
+                    writer.write(ret.toString());
+                    writer.flush();
+                    writer.close();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
     }

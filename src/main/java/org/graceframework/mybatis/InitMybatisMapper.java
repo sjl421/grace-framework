@@ -18,7 +18,7 @@ public class InitMybatisMapper {
 
     static {
 
-        Set<Class<?>> mapperInterfaces = scanner.scanPackage("com.test.demo.mybatis.dao");
+        Set<Class<?>> mapperInterfaces = scanner.scanPackage("framework.test.dao");
         for (Class<?> mapperInterface : mapperInterfaces) {
             beanFactory.setBean(mapperInterface, ProxyFactory.createMapperInstanceProxy(mapperInterface));
         }

@@ -79,8 +79,8 @@ public final class DefaultClassScanner implements ClassScanner {
             packageName = StringUtil.EMPTY;
         }
         Assert.assertTrue("请输入规范的包名...",checkPackageName(packageName));
-        if (logger.isWarnEnabled()) {
-            logger.warn("正在扫描包 [{}]...", packageName);
+        if (logger.isDebugEnabled()) {
+            logger.debug("正在扫描包 [{}]...", packageName);
         }
 
         final Set<Class<?>> classSet = new HashSet<>();

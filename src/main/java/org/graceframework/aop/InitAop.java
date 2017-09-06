@@ -8,7 +8,6 @@ import org.graceframework.beans.annotation.Service;
 import org.graceframework.beans.scanner.ClassScannerEntrance;
 import org.graceframework.proxy.ProxyFactory;
 import org.graceframework.tx.proxy.TransactionAopProxy;
-import org.graceframework.util.ClassUtil;
 import org.graceframework.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,6 @@ public class InitAop {
     private static final ClassScannerEntrance scanner = ClassScannerEntrance.getInstance();
 
     static {
-
         //获取aop切面类和目标类的映射关系
         Map<Object,Set<Class<?>>> aopToClsses = getAopToTargetClasses();
         //获取目标类和aopList的映射关系
@@ -44,8 +42,6 @@ public class InitAop {
 
     /**
      * 获取 目标类和aopList的映射关系
-     * @param aopToClsses
-     * @return
      */
     private static Map<Class<?>,List<AopProxy>> getTargetClassesToAopList(Map<Object, Set<Class<?>>> aopToClsses) {
 
@@ -74,14 +70,14 @@ public class InitAop {
     private static Map<Object,Set<Class<?>>> getAopToTargetClasses() {
 
         //有序集合
-        Map<Object,Set<Class<?>>> aopToClsses = new TreeMap<>();
+        Map<Object,Set<Class<?>>> aopToClasses = new LinkedHashMap<>();
 
         List<Object> aopInstanceList = getAopInstanceListAndSort();
         for (Object aopInstance : aopInstanceList) {
             Aspect annotation = aopInstance.getClass().getAnnotation(Aspect.class);
             Set<Class<?>> targetClasses = getTargetClasses(annotation);
             if (targetClasses.size() > 0) {
-                aopToClsses.put(aopInstance,targetClasses);
+                aopToClasses.put(aopInstance,targetClasses);
             } else {
                 logger.warn("{} 切面类，没有发现任何目标类",aopInstance.getClass());
             }
@@ -89,12 +85,12 @@ public class InitAop {
         }
         Set<Class<?>> serviceClasses = getServiceClasses();
         if (serviceClasses.size() > 0) {
-            aopToClsses.put(new TransactionAopProxy(),serviceClasses);
+            aopToClasses.put(new TransactionAopProxy(),serviceClasses);
         } else {
             logger.warn("{} 切面类，没有发现任何目标类",TransactionAopProxy.class);
         }
 
-        return aopToClsses;
+        return aopToClasses;
     }
 
     /**
@@ -106,18 +102,22 @@ public class InitAop {
         List<Object> aopInstanceList = beanFactory.getBeanByYouWant(new Filter<Class<?>>() {
             @Override
             public boolean accept(Class<?> clazz) {
-                return AopProxy.class.isAssignableFrom(clazz) && clazz.isAnnotationPresent(Aspect.class) && ClassUtil.isNormalClass(clazz);
+                return AopProxy.class.isAssignableFrom(clazz) && clazz.isAnnotationPresent(Aspect.class);
             }
         });
-
         Collections.sort(aopInstanceList, new Comparator<Object>() {
 
             @Override
             public int compare(Object o1, Object o2) {
-                Aspect Aspect1 = o1.getClass().getAnnotation(Aspect.class);
+                Class<?> clazz1 = o1.getClass();
+                Aspect Aspect1 = clazz1.getAnnotation(Aspect.class);
                 Integer order1 = Aspect1.order();
-                Aspect Aspect2 = o2.getClass().getAnnotation(Aspect.class);
+                Class<?> clazz2 = o2.getClass();
+                Aspect Aspect2 = clazz2.getAnnotation(Aspect.class);
                 Integer order2 = Aspect2.order();
+                if (order1 == 0 && order2 == 0) {
+                    return clazz1.hashCode() - clazz2.hashCode();
+                }
                 return order1.compareTo(order2);
             }
         });

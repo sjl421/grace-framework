@@ -1,8 +1,11 @@
 package org.graceframework;
 
+import org.graceframework.aop.InitAop;
 import org.graceframework.beans.core.DependencyInjection;
 import org.graceframework.beans.core.InitBeanFactory;
 import org.graceframework.mvc.core.InitHandlerMapping;
+import org.graceframework.mybatis.InitMybatisMapper;
+import org.graceframework.mybatis.MybatisContext;
 import org.graceframework.util.ClassUtil;
 
 import javax.servlet.ServletContextEvent;
@@ -19,7 +22,11 @@ public class Bootstrap implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
+
         ClassUtil.loadClass(InitBeanFactory.class.getName());
+        ClassUtil.loadClass(InitAop.class.getName());
+        ClassUtil.loadClass(MybatisContext.class.getName());
+        ClassUtil.loadClass(InitMybatisMapper.class.getName());
         ClassUtil.loadClass(DependencyInjection.class.getName());
         ClassUtil.loadClass(InitHandlerMapping.class.getName());
     }

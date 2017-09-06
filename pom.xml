@@ -42,6 +42,7 @@
     <cglib.version>3.2.5</cglib.version>
     <mybatis.version>3.2.8</mybatis.version>
     <druid.version>1.0.31</druid.version>
+    <mysql.connector.version>5.1.18</mysql.connector.version>
     <junit.version>4.10</junit.version>
   </properties>
 
@@ -101,6 +102,12 @@
       <groupId>com.alibaba</groupId>
       <artifactId>druid</artifactId>
       <version>${druid.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>${mysql.connector.version}</version>
     </dependency>
   </dependencies>
 

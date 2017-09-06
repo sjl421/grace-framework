@@ -43,8 +43,8 @@ public class DependencyInjection {
 
                     for (Field field : fields) {
                         if (field.isAnnotationPresent(Inject.class)) {
-                            if (logger.isWarnEnabled()) {
-                                logger.warn("开始对实例 {} 进行依赖注入 {} ...", instance.getClass(), field.getType());
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("开始对实例 {} 进行依赖注入 {} ...", instance.getClass(), field.getType());
                             }
                             field.setAccessible(true);
                             Inject inject = field.getAnnotation(Inject.class);
@@ -91,7 +91,7 @@ public class DependencyInjection {
             List<Object> list = beanFactory.getBeanByYouWant(new Filter<Class<?>>() {
                 @Override
                 public boolean accept(Class<?> clazz) {
-                    return fieldClass.isAssignableFrom(clazz) && ClassUtil.isNormalClass(clazz);
+                    return fieldClass.isAssignableFrom(clazz);
                 }
             });
             int size = list.size();

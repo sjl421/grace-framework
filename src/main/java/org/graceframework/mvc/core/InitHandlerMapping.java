@@ -49,8 +49,8 @@ public class InitHandlerMapping {
                     Requester requester = createRequester(method,controllerPath);
                     if (requester != null) {
 
-                        if (logger.isWarnEnabled()) {
-                            logger.warn("控制器处理器映射开始建立 {} -- {}", requester.getPath(), method);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("控制器处理器映射开始建立 {} -- {}", requester.getPath(), method);
                         }
                         //验证是否用重复的handle
                         String requestPath = requester.getPath();
@@ -184,7 +184,7 @@ public class InitHandlerMapping {
         List<Object> list = beanFactory.getBeanByYouWant(new Filter<Class<?>>() {
             @Override
             public boolean accept(Class<?> clazz) {
-                return clazz.isAnnotationPresent(Interceptor.class) && ClassUtil.isNormalClass(clazz) ;
+                return clazz.isAnnotationPresent(Interceptor.class);
             }
         });
 
@@ -192,10 +192,15 @@ public class InitHandlerMapping {
 
             @Override
             public int compare(Object o1, Object o2) {
-                Interceptor interceptor1 = o1.getClass().getAnnotation(Interceptor.class);
+                Class<?> clazz1 = o1.getClass();
+                Interceptor interceptor1 = clazz1.getAnnotation(Interceptor.class);
                 Integer order1 = interceptor1.order();
-                Interceptor interceptor2 = o2.getClass().getAnnotation(Interceptor.class);
+                Class<?> clazz2 = o2.getClass();
+                Interceptor interceptor2 = clazz2.getAnnotation(Interceptor.class);
                 Integer order2 = interceptor2.order();
+                if (order1 ==0 && order2 == 0) {
+                    return clazz1.hashCode() - clazz2.hashCode();
+                }
                 return order1.compareTo(order2);
             }
         });

@@ -31,8 +31,8 @@ public class MybatisContext {
     private static final String MYBATIS_LOG = "SLF4J";
     private static final String MYBATIS_SQLSESSIONFACTORY_NAME = "First_SqlSession_Factory";
 
-    private static final String MYBATIS_MAPPERLOCATIONS = "com/test/demo/mybatis/mapping";
-    private static final String MYBATIS_BASEPACKAGE = "com.test.demo.mybatis.dao";
+    private static final String MYBATIS_MAPPERLOCATIONS = "framework/test/mapping";
+    private static final String MYBATIS_BASEPACKAGE = "framework.test.dao";
 
 
     private static SqlSessionFactory sqlSessionFactory;
@@ -50,20 +50,22 @@ public class MybatisContext {
                     try {
                         registerXml(res, configuration);
                     } catch (Exception e) {
+                        System.err.println(String.format("注册xml[ %s ]失败，失败信息: %s", res, e.getMessage()));
                         logger.debug("注册xml[ {} ]失败，失败信息: {}" , res, e.getMessage());
                     }
                 }
             }
-            if (!MYBATIS_BASEPACKAGE.equals("")) {
+           /* if (!MYBATIS_BASEPACKAGE.equals("")) {
                 String[] packages = MYBATIS_BASEPACKAGE.split(",");
                 for (String pk : packages) {
                     try {
                         configuration.addMappers(pk);
                     } catch (Exception e) {
+                        System.err.println(String.format("注册包[ %s ]失败，失败信息: %s", pk, e.getMessage()));
                         logger.debug("注册包[ {} ]失败，失败信息: {}" , pk, e.getMessage());
                     }
                 }
-            }
+            }*/
             sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
         }
     }
@@ -72,17 +74,19 @@ public class MybatisContext {
      * 注册mapper.xml
      */
     private static void registerXml(String res, Configuration configuration) {
+
         if (res.toLowerCase().endsWith(".xml")) {
             InputStream inputStream = null;
             try {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("正在注册xml {}" , res);
+                    logger.debug("正在注册mapper xml {}" , res);
                 }
                 inputStream = Resources.getResourceAsStream(res);
                 XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, res, configuration.getSqlFragments());
                 mapperParser.parse();
             } catch (Exception e) {
-                logger.error(e.getMessage());
+                System.err.println(String.format("注册mapper xml %s 出现异常，原因%s", res, e.getMessage()));
+                logger.error("注册mapper xml {} 出现异常，原因{}",res,e.getMessage());
                 //不处理
             } finally {
                 if (inputStream != null) {
@@ -116,7 +120,8 @@ public class MybatisContext {
                     }
                 }
             } catch (IOException e) {
-                logger.error(e.getMessage());
+                System.err.println(String.format("注册mapper xml %s 出现异常，原因 %s", res, e.getMessage()));
+                logger.error("注册mapper xml {} 出现异常，原因{}",res,e.getMessage());
             }
         }
     }
