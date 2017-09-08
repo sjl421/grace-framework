@@ -29,7 +29,7 @@ public class HandlerInvoker {
             if (ret != null) {
                 try {
                     // 设置响应头
-                    response.setContentType("application/json"); // 指定内容类型为 JSON 格式
+                    response.setHeader("Content-type", "application/json;charset=UTF-8");
                     response.setCharacterEncoding("utf-8"); // 防止中文乱码
                     // 向响应中写入数据
                     PrintWriter writer = response.getWriter();
